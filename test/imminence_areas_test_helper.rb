@@ -57,7 +57,7 @@ module ImminenceAreasTestHelper
     )
     stub_request(:get, %r{\A#{endpoint}/areas/DIS.json}).to_return(
       body: areas_response(districts)
-    ) 
+    )
     stub_request(:get, %r{\A#{endpoint}/areas/LBO.json}).to_return(
       body: areas_response(london_boroughs)
     )

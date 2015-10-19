@@ -1,261 +1,288 @@
 require 'integration_test_helper'
+require 'imminence_areas_test_helper.rb'
 
 class ChangeEditionTypeTest < JavascriptIntegrationTest
+  include ImminenceAreasTestHelper
+
   setup do
     panopticon_has_metadata("id" => "2356")
     stub_collections
     %w(Alice Bob Charlie).each do |name|
       FactoryGirl.create(:user, name: name)
     end
+    stub_mapit_areas_requests(Plek.current.find('imminence'))
   end
 
   teardown do
     GDS::SSO.test_user = nil
   end
 
+  #For edition types that have a body parameter
+
+  edition_types = [:transaction_edition, :place_edition, :programme_edition, :simple_smart_answer_edition, :business_support_edition, :answer_edition, :guide_edition, :licence_edition, :video_edition, :completed_transaction_edition, :help_page_edition, :campaign_edition]
+
+  conversions = edition_types.permutation(2).reject { |pair| pair[0] == pair[1] }
+
+  conversions.each do |pair|
+
+    from, to = pair
+    should "be able to convert #{from} into #{to}" do
+      edition = FactoryGirl.create(from, state: 'published')
+      visit_edition edition
+
+      within "div.tabbable" do
+        click_on "Admin"
+      end
+
+      select(to.to_s.gsub("_", " ").titleize, :from => 'to')
+
+      click_on "Convert"
+
+      assert_text edition.title
+      assert_text "New edition created"
+      text_to_look_for = edition.whole_body.gsub(/\s+/, " ").strip
+      assert_selector("form#edition-form .tab-pane textarea", text: /\s*#{Regexp.quote(text_to_look_for)}\s*/, visible: true) unless edition.respond_to?(:parts)
+    end
+  end
+
   # tests for changing Guide, Programme and Transaction into Answer
 
-  test "should be able to convert a GuideEdition into an AnswerEdition" do
-    guide = FactoryGirl.create(:guide_edition, state: 'published')
-    visit_edition guide
 
-    within "div.tabbable" do
-      click_on "Admin"
-    end
+#   test "should be able to convert a LicenceEdition into an AnswerEdition" do
+#     skip("reason for skipping the test")
+#     licence = FactoryGirl.create(:licence_edition, state: 'published', licence_overview: "Licence overview content", licence_short_description: "Short description content")
+#     visit_edition licence
 
-    assert page.has_button?("Create as new Answer edition")
+#     within "div.tabbable" do
+#       click_on "Admin"
+#     end
 
-    click_on "Create as new Answer edition"
+#     assert page.has_button?("Create as new Answer edition")
 
-    assert page.has_content?(guide.title)
-    assert page.has_content?("New edition created")
-    assert page.has_content?(guide.whole_body)
-  end
+#     click_on "Create as new Answer edition"
 
-  test "should be able to convert a LicenceEdition into an AnswerEdition" do
-    licence = FactoryGirl.create(:licence_edition, state: 'published', licence_overview: "Licence overview content", licence_short_description: "Short description content")
-    visit_edition licence
+#     assert page.has_content?(licence.title)
+#     assert page.has_content?("New edition created")
 
-    within "div.tabbable" do
-      click_on "Admin"
-    end
+#     assert_field_contains("Licence overview content", "Body")
+#     assert_field_contains("Short description content", "Body")
+#   end
 
-    assert page.has_button?("Create as new Answer edition")
+#   test "should be able to convert a ProgrammeEdition into an AnswerEdition" do
+#     skip("reason for skipping the test")
+#     programme = FactoryGirl.create(:programme_edition, state: 'published')
+#     visit_edition programme
 
-    click_on "Create as new Answer edition"
+#     within "div.tabbable" do
+#       click_on "Admin"
+#     end
 
-    assert page.has_content?(licence.title)
-    assert page.has_content?("New edition created")
+#     assert page.has_button?("Create as new Answer edition")
 
-    assert_field_contains("Licence overview content", "Body")
-    assert_field_contains("Short description content", "Body")
-  end
+#     click_on "Create as new Answer edition"
 
-  test "should be able to convert a ProgrammeEdition into an AnswerEdition" do
-    programme = FactoryGirl.create(:programme_edition, state: 'published')
-    visit_edition programme
+#     assert page.has_content?(programme.title)
+#     assert page.has_content?("New edition created")
 
-    within "div.tabbable" do
-      click_on "Admin"
-    end
+#     assert_field_contains("Overview", "Body")
+#     assert_field_contains("What you'll get", "Body")
+#     assert_field_contains("Eligibility", "Body")
+#     assert_field_contains("How to claim", "Body")
+#     assert_field_contains("Further information", "Body")
+#   end
 
-    assert page.has_button?("Create as new Answer edition")
+#   test "should be able to convert a TransactionEdition into an AnswerEdition" do
+#     skip("reason for skipping the test")
+#     transaction = FactoryGirl.create(:transaction_edition, slug: "childcare", state: 'published')
+#     visit_edition transaction
 
-    click_on "Create as new Answer edition"
+#     within "div.tabbable" do
+#       click_on "Admin"
+#     end
 
-    assert page.has_content?(programme.title)
-    assert page.has_content?("New edition created")
+#     assert page.has_button?("Create as new Answer edition")
 
-    assert_field_contains("Overview", "Body")
-    assert_field_contains("What you'll get", "Body")
-    assert_field_contains("Eligibility", "Body")
-    assert_field_contains("How to claim", "Body")
-    assert_field_contains("Further information", "Body")
-  end
+#     click_on "Create as new Answer edition"
 
-  test "should be able to convert a TransactionEdition into an AnswerEdition" do
-    transaction = FactoryGirl.create(:transaction_edition, slug: "childcare", state: 'published')
-    visit_edition transaction
+#     assert page.has_content?(transaction.title)
+#     assert page.has_content?("New edition created")
+#     assert_field_contains(transaction.more_information, "Body")
+#     assert_field_contains(transaction.alternate_methods, "Body")
+#   end
 
-    within "div.tabbable" do
-      click_on "Admin"
-    end
+#   test "should be able to convert a SimpleSmartAnswerEdition into an AnswerEdition" do
+#     skip("reason for skipping the test")
+#     simple_smart_answer = FactoryGirl.create(:simple_smart_answer_edition, state: 'published')
+#     visit_edition simple_smart_answer
 
-    assert page.has_button?("Create as new Answer edition")
+#     within "div.tabbable" do
+#       click_on "Admin"
+#     end
 
-    click_on "Create as new Answer edition"
+#     assert page.has_button?("Create as new Answer edition")
 
-    assert page.has_content?(transaction.title)
-    assert page.has_content?("New edition created")
-    assert_field_contains(transaction.more_information, "Body")
-    assert_field_contains(transaction.alternate_methods, "Body")
-  end
+#     click_on "Create as new Answer edition"
 
-  test "should be able to convert a SimpleSmartAnswerEdition into an AnswerEdition" do
-    simple_smart_answer = FactoryGirl.create(:simple_smart_answer_edition, state: 'published')
-    visit_edition simple_smart_answer
+#     assert_text(simple_smart_answer.title)
+#     assert_text("New edition created")
+#   end
 
-    within "div.tabbable" do
-      click_on "Admin"
-    end
+# # tests for changing Answer, Guide, Programme into a Transaction
 
-    assert page.has_button?("Create as new Answer edition")
+#   test "should be able to convert an AnswerEdition into a TransactionEdition" do
+#     skip("reason for skipping the test")
+#     answer = FactoryGirl.create(:answer_edition, state: 'published')
+#     visit_edition answer
 
-    click_on "Create as new Answer edition"
+#     within "div.tabbable" do
+#       click_on "Admin"
+#     end
 
-    assert_text(simple_smart_answer.title)
-    assert_text("New edition created")
-  end
+#     assert page.has_button?("Create as new Transaction edition")
 
-# tests for changing Answer, Guide, Programme into a Transaction
+#     click_on "Create as new Transaction edition"
 
-  test "should be able to convert an AnswerEdition into a TransactionEdition" do
-    answer = FactoryGirl.create(:answer_edition, state: 'published')
-    visit_edition answer
+#     assert page.has_content?(answer.title)
+#     assert page.has_content?("New edition created")
+#     assert page.has_content?("Introductory paragraph")
+#     assert page.has_content?("Will continue on")
+#     assert page.has_content?("Link to start of transaction")
+#     assert page.has_content?("More information")
+
+#     within :css, '#edition_more_information_input' do
+#       assert page.has_xpath?("//textarea[contains(text(), '#{answer.whole_body}')]"), "Expected to see: #{answer.whole_body}"
+#     end
+#   end
+
+#   test "should be able to convert an AnswerEdition into a SimpleSmartAnswerEdition" do
+#     skip("reason for skipping the test")
+#     answer = FactoryGirl.create(:answer_edition, state: 'published', body: "abcde")
+#     visit_edition answer
+
+#     within "div.tabbable" do
+#       click_on "Admin"
+#     end
 
-    within "div.tabbable" do
-      click_on "Admin"
-    end
+#     assert page.has_button?("Create as new Simple Smart Answer edition")
 
-    assert page.has_button?("Create as new Transaction edition")
+#     click_on "Create as new Simple Smart Answer edition"
 
-    click_on "Create as new Transaction edition"
-
-    assert page.has_content?(answer.title)
-    assert page.has_content?("New edition created")
-    assert page.has_content?("Introductory paragraph")
-    assert page.has_content?("Will continue on")
-    assert page.has_content?("Link to start of transaction")
-    assert page.has_content?("More information")
-
-    within :css, '#edition_more_information_input' do
-      assert page.has_xpath?("//textarea[contains(text(), '#{answer.whole_body}')]"), "Expected to see: #{answer.whole_body}"
-    end
-  end
-
-  test "should be able to convert an AnswerEdition into a SimpleSmartAnswerEdition" do
-    answer = FactoryGirl.create(:answer_edition, state: 'published', body: "abcde")
-    visit_edition answer
-
-    within "div.tabbable" do
-      click_on "Admin"
-    end
-
-    assert page.has_button?("Create as new Simple Smart Answer edition")
-
-    click_on "Create as new Simple Smart Answer edition"
-
-    assert page.has_content?(answer.title)
-    assert page.has_content?("New edition created")
-    assert page.has_content?("Question 1")
-
-    within :css, '#edition_body_input' do
-      assert page.has_xpath?("//textarea[contains(text(), '#{answer.whole_body}')]"), "Expected to see: #{answer.whole_body}"
-    end
-  end
-
-  test "should be able to convert an GuideEdition into a TransactionEdition" do
-    guide = FactoryGirl.create(:guide_edition, state: 'published')
-    visit_edition guide
-
-    within "div.tabbable" do
-      click_on "Admin"
-    end
-
-    assert page.has_button?("Create as new Transaction edition")
-
-    click_on "Create as new Transaction edition"
-
-    assert page.has_content?(guide.title)
-    assert page.has_content?("New edition created")
-    assert page.has_content?("Introductory paragraph")
-    assert page.has_content?("Will continue on")
-    assert page.has_content?("Link to start of transaction")
-    assert page.has_content?("More information")
-    assert page.has_content?(guide.whole_body)
-  end
-
-  test "should be able to convert an ProgrammeEdition into a TransactionEdition" do
-    programme = FactoryGirl.create(:programme_edition, state: 'published')
-    visit_edition programme
-
-    within "div.tabbable" do
-      click_on "Admin"
-    end
-
-    assert page.has_button?("Create as new Transaction edition")
-
-    click_on "Create as new Transaction edition"
-
-    assert page.has_content?(programme.title)
-    assert page.has_content?("New edition created")
-    assert page.has_content?("Introductory paragraph")
-    assert page.has_content?("Will continue on")
-    assert page.has_content?("Link to start of transaction")
-    assert page.has_content?("More information")
-
-    assert_field_contains("Overview", "More information")
-    assert_field_contains("What you'll get", "More information")
-    assert_field_contains("Eligibility", "More information")
-    assert_field_contains("How to claim", "More information")
-    assert_field_contains("Further information", "More information")
-  end
-
-
-# tests for changing Answer and Programme into Guide
-  test "should be able to convert an AnswerEdition into a GuideEdition" do
-    answer = FactoryGirl.create(:answer_edition, slug: "childcare", title: "meh", body: "bleh", state: 'published')
-    visit_edition answer
-
-    within "div.tabbable" do
-      click_on "Admin"
-    end
-
-    assert page.has_button?("Create as new Guide edition")
-
-    click_on "Create as new Guide edition"
-
-    assert page.has_content?(answer.title)
-    assert page.has_content?("New edition created")
-
-    within :css, '#parts div.fields:first-of-type' do
-      assert page.has_xpath?("//textarea[contains(text(), '#{answer.whole_body}')]"), "Expected to see: #{answer.whole_body}"
-    end
-  end
-
-  test "should be able to convert a ProgrammeEdition into a GuideEdition" do
-    programme = FactoryGirl.create(:programme_edition, state: 'published')
-    visit_edition programme
-
-    within "div.tabbable" do
-      click_on "Admin"
-    end
-
-    assert page.has_button?("Create as new Guide edition")
-
-    click_on "Create as new Guide edition"
-
-    assert page.has_content?(programme.title)
-    assert page.has_content?("New edition created")
-
-    within :css, '#parts div.fields:first-of-type' do
-      assert page.has_field?("Title", :with => 'Overview')
-      assert page.has_field?("Slug", :with => 'overview')
-    end
-    within :css, '#parts div.fields:nth-of-type(2)' do
-      assert page.has_field?("Title", :with => "What you'll get")
-      assert page.has_field?("Slug", :with => 'what-youll-get')
-    end
-  end
-
-  test "should not be able to convert a GuideEdition into an AnswerEdition if not published" do
-    guide = FactoryGirl.create(:guide_edition, state: 'ready')
-    visit_edition guide
-
-    within "div.tabbable" do
-      click_on "Admin"
-    end
-
-    refute page.has_button?("Create as new Answer edition")
-  end
+#     assert page.has_content?(answer.title)
+#     assert page.has_content?("New edition created")
+#     assert page.has_content?("Question 1")
+
+#     within :css, '#edition_body_input' do
+#       assert page.has_xpath?("//textarea[contains(text(), '#{answer.whole_body}')]"), "Expected to see: #{answer.whole_body}"
+#     end
+#   end
+
+#   test "should be able to convert an GuideEdition into a TransactionEdition" do
+#     skip("reason for skipping the test")
+#     guide = FactoryGirl.create(:guide_edition, state: 'published')
+#     visit_edition guide
+
+#     within "div.tabbable" do
+#       click_on "Admin"
+#     end
+
+#     assert page.has_button?("Create as new Transaction edition")
+
+#     click_on "Create as new Transaction edition"
+
+#     assert page.has_content?(guide.title)
+#     assert page.has_content?("New edition created")
+#     assert page.has_content?("Introductory paragraph")
+#     assert page.has_content?("Will continue on")
+#     assert page.has_content?("Link to start of transaction")
+#     assert page.has_content?("More information")
+#     assert page.has_content?(guide.whole_body)
+#   end
+
+#   test "should be able to convert an ProgrammeEdition into a TransactionEdition" do
+#     skip("reason for skipping the test")
+#     programme = FactoryGirl.create(:programme_edition, state: 'published')
+#     visit_edition programme
+
+#     within "div.tabbable" do
+#       click_on "Admin"
+#     end
+
+#     assert page.has_button?("Create as new Transaction edition")
+
+#     click_on "Create as new Transaction edition"
+
+#     assert page.has_content?(programme.title)
+#     assert page.has_content?("New edition created")
+#     assert page.has_content?("Introductory paragraph")
+#     assert page.has_content?("Will continue on")
+#     assert page.has_content?("Link to start of transaction")
+#     assert page.has_content?("More information")
+#TODO: Do part names get transferred in the body? how to test for that? Should I make a separate test just for things with parts?
+#     assert_field_contains("Overview", "More information")
+#     assert_field_contains("What you'll get", "More information")
+#     assert_field_contains("Eligibility", "More information")
+#     assert_field_contains("How to claim", "More information")
+#     assert_field_contains("Further information", "More information")
+#   end
+
+
+# # tests for changing Answer and Programme into Guide
+#   test "should be able to convert an AnswerEdition into a GuideEdition" do
+#     skip("reason for skipping the test")
+#     answer = FactoryGirl.create(:answer_edition, slug: "childcare", title: "meh", body: "bleh", state: 'published')
+#     visit_edition answer
+
+#     within "div.tabbable" do
+#       click_on "Admin"
+#     end
+
+#     assert page.has_button?("Create as new Guide edition")
+
+#     click_on "Create as new Guide edition"
+
+#     assert page.has_content?(answer.title)
+#     assert page.has_content?("New edition created")
+
+#     within :css, '#parts div.fields:first-of-type' do
+#       assert page.has_xpath?("//textarea[contains(text(), '#{answer.whole_body}')]"), "Expected to see: #{answer.whole_body}"
+#     end
+#   end
+
+#   test "should be able to convert a ProgrammeEdition into a GuideEdition" do
+#     skip("reason for skipping the test")
+#     programme = FactoryGirl.create(:programme_edition, state: 'published')
+#     visit_edition programme
+
+#     within "div.tabbable" do
+#       click_on "Admin"
+#     end
+
+#     assert page.has_button?("Create as new Guide edition")
+
+#     click_on "Create as new Guide edition"
+
+#     assert page.has_content?(programme.title)
+#     assert page.has_content?("New edition created")
+
+#     within :css, '#parts div.fields:first-of-type' do
+#       assert page.has_field?("Title", :with => 'Overview')
+#       assert page.has_field?("Slug", :with => 'overview')
+#     end
+#     within :css, '#parts div.fields:nth-of-type(2)' do
+#       assert page.has_field?("Title", :with => "What you'll get")
+#       assert page.has_field?("Slug", :with => 'what-youll-get')
+#     end
+#   end
+
+#   test "should not be able to convert a GuideEdition into an AnswerEdition if not published" do
+#     skip("reason for skipping the test")
+#     guide = FactoryGirl.create(:guide_edition, state: 'ready')
+#     visit_edition guide
+
+#     within "div.tabbable" do
+#       click_on "Admin"
+#     end
+
+#     refute page.has_button?("Create as new Answer edition")
+#   end
 end
