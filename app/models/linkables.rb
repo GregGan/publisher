@@ -28,13 +28,9 @@ class Linkables
 
       title = "#{title} (draft)" if item.fetch("publication_state") == "draft"
 
-      # Because this application works with the "slugs" of topics and browse
-      # pages, we have to use that as the ID in the form (without a leading
-      # /browse/ or /topic/). This will be replaced with `content_id` once
-      # we've fully migrated this application to the new tagging architecture.
-      base_path = item.fetch('base_path').sub(%r[/(browse|topic)/], '')
+      content_id = item.fetch('content_id')
 
-      [title, base_path]
+      [title, content_id]
     end
 
     items
