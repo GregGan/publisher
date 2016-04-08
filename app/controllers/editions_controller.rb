@@ -8,6 +8,10 @@ class EditionsController < InheritedResources::Base
   after_filter :report_state_counts, :only => [:create, :duplicate, :progress, :destroy]
   before_filter :remove_blank_collections, only: [:create, :update]
 
+  def tagging_update_form
+    Tagging::TaggingUpdateForm.build_from_publishing_api(@resource.artefact.content_id)
+  end
+
   def index
     redirect_to root_path
   end
@@ -16,6 +20,8 @@ class EditionsController < InheritedResources::Base
     if @resource.is_a?(Parted)
       @ordered_parts = @resource.parts.in_order
     end
+
+    @tagging_update = tagging_update_form
     render :action => "show"
   end
   alias_method :metadata, :show
@@ -82,6 +88,7 @@ class EditionsController < InheritedResources::Base
       }
       failure.html {
         @resource = resource
+        @tagging_update = tagging_update_form
         flash.now[:danger] = format_failure_message(resource)
         render :action => "show"
       }
@@ -92,6 +99,16 @@ class EditionsController < InheritedResources::Base
       }
       failure.json { render :json => resource.errors, :status=>406 }
     end
+  end
+
+  def tagging
+    @tagging_update = tagging_update_form
+    render action: "show"
+  end
+
+  def update_tagging
+    Tagging::TaggingUpdateForm.new(params[:tagging_tagging_update_form]).publish!
+    redirect_to :back, flash: {success: "Tags have been updated!"}
   end
 
   def review

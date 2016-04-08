@@ -7,6 +7,7 @@ class ChangeEditionTypeTest < JavascriptIntegrationTest
   setup do
     panopticon_has_metadata("id" => "2356")
     stub_linkables
+    stub_no_links_for_all_content_ids
     %w(Alice Bob Charlie).each do |name|
       FactoryGirl.create(:user, name: name)
     end

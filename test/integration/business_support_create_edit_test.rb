@@ -50,6 +50,7 @@ class BusinessSupportCreateEditTest < JavascriptIntegrationTest
 
     setup_users
     stub_linkables
+    stub_no_links_for_all_content_ids
   end
 
   should "create a new BusinessSupportEdition" do
