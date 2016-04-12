@@ -16,8 +16,10 @@ Publisher::Application.routes.draw do
       get 'diff'
       get 'metadata'
       get 'history'
+      get 'tagging'
       get 'admin'
       post 'duplicate'
+      post 'update_tagging'
       post 'progress'
       put 'review'
       post 'skip_fact_check', to: 'editions#progress',

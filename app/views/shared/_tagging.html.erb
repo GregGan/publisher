@@ -1,0 +1,37 @@
+<%= semantic_bootstrap_nested_form_for (@tagging_update || raise("No @tagging_update")), url: update_tagging_edition_path(@resource) do |f| %>
+  <%= f.hidden_field :content_id %>
+  <%= f.hidden_field :previous_version %>
+
+  <div class="row">
+    <div class="col-md-7 edition-tags">
+      <div class="form-group" id="edition_browse_pages_input">
+        <%= f.label :mainstream_browse_pages, "Mainstream browse pages", class: 'control-label remove-bottom-margin' %>
+        <p class="help-block">The first mainstream browse page will form the content’s breadcrumb</p>
+        <%= f.select :mainstream_browse_pages,
+                        Tagging::Linkables.mainstream_browse_pages,
+                        {},
+                        { multiple: true,
+                          class: 'selectize',
+                          data: { placeholder: 'Choose mainstream browse pages…' } } %>
+      </div>
+      <div class="form-group" id="edition_primary_topic_input">
+        <%= f.label :parent, class: 'control-label' %>
+        <%= f.select :parent,
+                        Tagging::Linkables.topics,
+                        { include_blank: true },
+                        { class: 'select2',
+                          data: { placeholder: 'Choose primary topic…' } } %>
+      </div>
+      <div class="form-group" id="edition_additional_topics_input">
+        <%= f.label :topics, class: 'control-label' %>
+        <%= f.select :topics, Tagging::Linkables.topics,
+                        {},
+                        { multiple: true,
+                          class: 'select2',
+                          data: { placeholder: 'Choose additional topics…' } } %>
+      </div>
+    </div>
+  </div>
+
+  <%= f.submit 'Update tagging' %>
+<% end %>

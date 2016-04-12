@@ -16,6 +16,8 @@ class EditionsController < InheritedResources::Base
     if @resource.is_a?(Parted)
       @ordered_parts = @resource.parts.in_order
     end
+
+    @tagging_update = Tagging::TaggingUpdateForm.build_from_publishing_api(@resource.artefact.content_id)
     render :action => "show"
   end
   alias_method :metadata, :show
@@ -92,6 +94,16 @@ class EditionsController < InheritedResources::Base
       }
       failure.json { render :json => resource.errors, :status=>406 }
     end
+  end
+
+  def tagging
+    @tagging_update = Tagging::TaggingUpdateForm.build_from_publishing_api(@resource.artefact.content_id)
+    render action: "show"
+  end
+
+  def update_tagging
+    Tagging::TaggingUpdateForm.new(params[:tagging_tagging_update_form]).publish!
+    redirect_to :back, success: "Tags have been updated!"
   end
 
   def review
