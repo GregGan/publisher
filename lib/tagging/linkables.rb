@@ -5,13 +5,13 @@
 # across apps like content-tagger and Whitehall. Once we've migrated all apps
 # to use `content_id`, we may move this functionality into a gem.
 module Tagging
-  class Linkables
+  module Linkables
     def self.topics
-      @topics ||= get_tags_of_type('topic')
+      @@topics ||= get_tags_of_type('topic')
     end
 
     def self.mainstream_browse_pages
-      @mainstream_browse_pages ||= get_tags_of_type('mainstream_browse_page')
+      @@mainstream_browse_pages ||= get_tags_of_type('mainstream_browse_page')
     end
 
     def self.get_tags_of_type(document_type)
