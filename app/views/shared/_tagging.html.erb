@@ -5,21 +5,21 @@
   <div class="row">
     <div class="col-md-7 edition-tags">
       <div class="form-group" id="edition_parent_input">
-        <%= f.label :parent, "Parent/Breadcrumb", class: 'control-label remove-bottom-margin' %>
+        <%= f.label :parent, "Parent/Breadcrumb", class: 'control-label' %>
         <%= f.select :parent,
                         Tagging::Linkables.mainstream_browse_pages,
-                        {},
+                        { include_blank: true },
                         { multiple: false,
-                          class: 'selectize',
+                          class: 'select2',
                           data: { placeholder: 'Choose parent/breadcrumb…' } } %>
       </div>
       <div class="form-group" id="edition_browse_pages_input">
-        <%= f.label :mainstream_browse_pages, class: 'control-label' %>
+        <%= f.label :mainstream_browse_pages, "Mainstream browse pages", class: 'control-label' %>
         <%= f.select :mainstream_browse_pages,
                         Tagging::Linkables.mainstream_browse_pages,
                         {},
                         { multiple: true,
-                          class: 'select2',
+                          class: 'selectize',
                           data: { placeholder: 'Choose mainstream browse pages…' } } %>
       </div>
       <div class="form-group" id="edition_topics_input">

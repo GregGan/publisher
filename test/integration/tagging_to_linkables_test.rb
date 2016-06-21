@@ -22,7 +22,7 @@ class TaggingToLinkablesTest < JavascriptIntegrationTest
         links: {
           topics: [],
           mainstream_browse_pages: ["CONTENT-ID-VAT", "CONTENT-ID-RTI"],
-          parent:[]
+          parent: [],
         },
         previous_version: 0
       }
@@ -36,7 +36,6 @@ class TaggingToLinkablesTest < JavascriptIntegrationTest
     visit edition_path(edition)
     switch_tab 'Tagging'
 
-    select 'Oil and Gas / Wells', from: 'Parent'
     select 'Oil and Gas / Fields', from: 'Topics'
     select 'Oil and Gas / Distillation (draft)', from: 'Topics'
 
@@ -47,7 +46,30 @@ class TaggingToLinkablesTest < JavascriptIntegrationTest
         links: {
           topics: ['CONTENT-ID-DISTILL', 'CONTENT-ID-FIELDS'],
           mainstream_browse_pages: [],
-          parent:['CONTENT-ID-WELLS']
+          parent: [],
+        },
+        previous_version: 0
+      }
+    )
+  end
+
+  test "Tagging to parent" do
+    edition = FactoryGirl.create(:guide_edition)
+    content_id = edition.artefact.content_id
+
+    visit edition_path(edition)
+    switch_tab 'Tagging'
+
+    select 'Tax / RTI', from: 'Parent/Breadcrumb'
+
+    save_tags_and_assert_success
+    assert_publishing_api_patch_links(
+      content_id,
+      {
+        links: {
+          topics: [],
+          mainstream_browse_pages: [],
+          parent: ['CONTENT-ID-RTI'],
         },
         previous_version: 0
       }
