@@ -17,10 +17,8 @@ module TagTestHelpers
     ], document_type: "topic")
   end
 
-  def stub_no_links(content_id)
-    publishing_api_has_links(
-      "content_id" => content_id,
-      "links" => {},
-    )
+  def stub_no_links_for_all_content_ids
+    stub_request(:get, %r{\A#{PUBLISHING_API_V2_ENDPOINT}/links/.+})
+      .to_return(status: 200, body: "{}", headers: {})
   end
 end

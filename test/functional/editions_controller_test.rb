@@ -105,6 +105,8 @@ class EditionsControllerTest < ActionController::TestCase
   end
 
   test "should show the edit page again if updating fails" do
+    stub_no_links_for_all_content_ids
+
     panopticon_has_metadata(
       "id" => "test"
     )
@@ -120,6 +122,8 @@ class EditionsControllerTest < ActionController::TestCase
   end
 
   test "should show the resource base errors if present" do
+    stub_no_links_for_all_content_ids
+
     panopticon_has_metadata("id" => "test")
     Edition.expects(:find).returns(@guide)
     @guide.stubs(:update_attributes).returns(false)
@@ -277,6 +281,7 @@ class EditionsControllerTest < ActionController::TestCase
   end
 
   test "we can view a programme" do
+    stub_no_links_for_all_content_ids
     get :show, :id => @programme.id
     assert_response :success
     refute_nil assigns(:resource)

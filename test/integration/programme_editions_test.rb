@@ -4,6 +4,7 @@ class ProgrammeEditionsTest < JavascriptIntegrationTest
   def setup
     setup_users
     stub_linkables
+    stub_no_links_for_all_content_ids
   end
 
   test "should have editable part titles" do

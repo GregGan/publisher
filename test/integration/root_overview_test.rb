@@ -130,6 +130,8 @@ class RootOverviewTest < ActionDispatch::IntegrationTest
 
   test "allows a user to claim 2i" do
     stub_linkables
+    stub_no_links_for_all_content_ids
+
     user = FactoryGirl.create(:user)
     assignee = FactoryGirl.create(:user)
     edition = FactoryGirl.create(:guide_edition, :title => "XXX", :state => 'in_review',
@@ -152,6 +154,8 @@ class RootOverviewTest < ActionDispatch::IntegrationTest
 
   test "prevents claiming 2i when someone else has" do
     stub_linkables
+    stub_no_links_for_all_content_ids
+
     user = FactoryGirl.create(:user)
     assignee = FactoryGirl.create(:user)
     another_user = FactoryGirl.create(:user, name: 'Another McPerson')

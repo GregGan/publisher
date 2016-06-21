@@ -4,12 +4,12 @@ class TaggingToLinkablesTest < JavascriptIntegrationTest
   setup do
     setup_users
     stub_linkables
+    stub_no_links_for_all_content_ids
   end
 
   test "Tagging to browse pages" do
     edition = FactoryGirl.create(:guide_edition)
     content_id = edition.artefact.content_id
-    stub_no_links(content_id)
 
     visit edition_path(edition)
     switch_tab 'Tagging'
@@ -32,7 +32,6 @@ class TaggingToLinkablesTest < JavascriptIntegrationTest
   test "Tagging to topics" do
     edition = FactoryGirl.create(:guide_edition)
     content_id = edition.artefact.content_id
-    stub_no_links(content_id)
 
     visit edition_path(edition)
     switch_tab 'Tagging'
