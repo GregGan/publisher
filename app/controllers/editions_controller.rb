@@ -107,12 +107,8 @@ class EditionsController < InheritedResources::Base
   end
 
   def update_tagging
-    response = Tagging::TaggingUpdateForm.new(params[:tagging_tagging_update_form]).publish!
-    # if response.code == 200
-      redirect_to :back, flash: {success: "Tags have been updated!"}
-    # else
-    #   redirect_to :back, flash: {danger: "Tag update failed!"}
-    # end
+    Tagging::TaggingUpdateForm.new(params[:tagging_tagging_update_form]).publish!
+    redirect_to :back, flash: {success: "Tags have been updated!"}
   end
 
   def review
