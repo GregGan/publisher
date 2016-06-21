@@ -108,7 +108,7 @@ class EditionsController < InheritedResources::Base
 
   def update_tagging
     Tagging::TaggingUpdateForm.new(params[:tagging_tagging_update_form]).publish!
-    redirect_to :back, success: "Tags have been updated!"
+    redirect_to :back, flash: {success: "Tags have been updated!"}
   end
 
   def review
