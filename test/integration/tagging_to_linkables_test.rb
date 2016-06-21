@@ -8,15 +8,16 @@ class TaggingToLinkablesTest < JavascriptIntegrationTest
 
   test "Tagging to browse pages" do
     edition = FactoryGirl.create(:guide_edition)
+    content_id = edition.artefact.content_id
+
+    stub_no_links(content_id)
 
     visit edition_path(edition)
-
+    switch_tab 'Tagging'
     selectize ['Tax / VAT', 'Tax / RTI (draft)'], 'Mainstream browse pages'
 
-    save_edition_and_assert_success
-    edition.reload
-
-    assert_equal ['tax/vat', 'tax/rti'], edition.browse_pages
+    save_tags_and_assert_success
+    assert_publishing_api_patch_links(content_id)
   end
 
   test "Tagging to topics" do
