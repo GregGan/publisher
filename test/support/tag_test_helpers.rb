@@ -16,4 +16,11 @@ module TagTestHelpers
       { base_path: '/topic/oil-and-gas/distillation', internal_name: 'Oil and Gas / Distillation', publication_state: 'draft', content_id: 'CONTENT-ID-DISTILL' },
     ], document_type: "topic")
   end
+
+  def stub_no_links(content_id)
+    publishing_api_has_links(
+      "content_id" => content_id,
+      "links" => {},
+    )
+  end
 end
