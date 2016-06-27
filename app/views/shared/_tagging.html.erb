@@ -12,7 +12,7 @@
                        Tagging::Linkables.mainstream_browse_pages,
                        {},
                        { multiple: true,
-                         class: 'select2',
+                         class: 'js-mainstreams select2',
                          data: { placeholder: 'Choose mainstream browse pages…' } } %>
 
           <p class='help-block'>
@@ -25,13 +25,19 @@
         </div>
 
         <div class="form-group" id="edition_parent_input">
-          <%= f.label :parent, "Primary mainstream browse page", class: 'control-label' %>
+          <%= f.label :parent, "Parent breadcrumb", class: 'control-label' %>
           <%= f.select :parent,
                        Tagging::Linkables.mainstream_browse_pages,
                        { include_blank: true },
                        { multiple: false,
-                         class: 'select2',
+                         class: 'js-primary-mainstream select2',
                          data: { placeholder: 'Choose a primary mainstream browse page…' } } %>
+
+         <br />
+         <div class="alert mainstream alert-warning hidden">
+           The parent breadcrumb does not match the browse pages.
+         </div>
+
 
           <p class='help-block'>
             If the page has a breadcrumb, it will be this browse page. For example
@@ -64,3 +70,36 @@
     <hr/>
     <%= f.submit 'Update tags' %>
 <% end %>
+
+
+<script type="text/javascript">
+  $(function () {
+    var $primaryMainstream = $('.js-primary-mainstream');
+    var $mainstreamAlertWarning = $('.mainstream.alert-warning');
+
+    $('.js-primary-mainstream, .js-mainstreams').on('change', function() {
+      $(this).addClass('interacted');
+
+      var mainstreams = $('.js-mainstreams :selected').map( function() {
+        return this.value || null;
+      });
+
+      var primaryMainstream = $('.js-primary-mainstream :selected').map( function() {
+        return this.value || null;
+      });
+
+      if (primaryMainstream.length != 0) {
+        if (mainstreams.length == 0 || (mainstreams.index(primaryMainstream) == -1 )) {
+          $mainstreamAlertWarning.removeClass('hidden');
+        }
+        else {
+          $mainstreamAlertWarning.addClass('hidden');
+        }
+      }
+      else if (mainstreams.length > primaryMainstream.length && $primaryMainstream.hasClass('interacted')) {
+        $mainstreamAlertWarning.removeClass('hidden');
+      }
+
+    })
+  });
+</script>
