@@ -16,6 +16,7 @@ class PublishedEditionPresenterTest < ActiveSupport::TestCase
         change_note: 'Test',
         version_number: 2,
         panopticon_id: artefact.id,
+        body: "Look at my **govspeak**.",
       )
 
       @presenter = PublishedEditionPresenter.new(@edition)
@@ -34,6 +35,7 @@ class PublishedEditionPresenterTest < ActiveSupport::TestCase
         redirects: [],
         update_type: "major",
         details: {
+          body: "<p>Look at my <strong>govspeak</strong>.</p>\n",
           change_note: @edition.change_note,
           tags: {
             browse_pages: ["tax/vat", "tax/capital-gains"],

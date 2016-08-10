@@ -21,6 +21,7 @@ class PublishedEditionPresenter
       redirects: [],
       update_type: update_type(options),
       details: {
+        body: body,
         change_note: @edition.latest_change_note,
         tags: {
           browse_pages: @edition.browse_pages,
@@ -34,6 +35,14 @@ class PublishedEditionPresenter
   end
 
 private
+
+  def body
+    if @edition.respond_to?(:body)
+      Govspeak::Document.new(@edition.body).to_html
+    else
+      ''
+    end
+  end
 
   def base_path
     "/#{@edition.slug}"
