@@ -9,7 +9,7 @@ class PublishedEditionPresenter
       title: @edition.title,
       base_path: base_path,
       description: @edition.overview || "",
-      schema_name: "placeholder",
+      schema_name: schema_name,
       document_type: @artefact.kind,
       need_ids: [],
       public_updated_at: public_updated_at,
@@ -20,15 +20,7 @@ class PublishedEditionPresenter
       ],
       redirects: [],
       update_type: update_type(options),
-      details: {
-        change_note: @edition.latest_change_note,
-        tags: {
-          browse_pages: @edition.browse_pages,
-          primary_topic: primary_topic,
-          additional_topics: @edition.additional_topics,
-          topics: (primary_topic + @edition.additional_topics)
-        },
-      },
+      details: details,
       locale: 'en',
     }
   end
@@ -37,6 +29,18 @@ private
 
   def base_path
     "/#{@edition.slug}"
+  end
+
+  def local_transaction?
+    @artefact.kind == 'local_transaction'
+  end
+
+  def schema_name
+    if local_transaction?
+      'placeholder_local_transaction'
+    else
+      'placeholder'
+    end
   end
 
   def update_type(options)
@@ -55,6 +59,23 @@ private
 
   def public_updated_at
     @edition.public_updated_at || @edition.updated_at
+  end
+
+  def details
+    base_details = {
+      change_note: @edition.latest_change_note,
+      tags: {
+        browse_pages: @edition.browse_pages,
+        primary_topic: primary_topic,
+        additional_topics: @edition.additional_topics,
+        topics: (primary_topic + @edition.additional_topics)
+      },
+    }
+    if local_transaction?
+      base_details.merge(lgsl: @edition.lgsl_code, lgil_override: @edition.lgil_override)
+    else
+      base_details
+    end
   end
 
   def tags
