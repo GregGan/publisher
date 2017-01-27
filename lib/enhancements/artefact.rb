@@ -4,6 +4,7 @@ class Artefact
   before_destroy :discard_publishing_api_draft
 
   MULTIPART_FORMATS = %w(guide local_transaction licence programme simple_smart_answer)
+  MIGRATED_FORMATS = %w(help_page)
 
   def self.published_edition_ids_for_format(format)
     artefact_ids = Artefact.where(kind: format).pluck(:id).map(&:to_s)
@@ -13,6 +14,10 @@ class Artefact
       .where(state: 'published')
       .map(&:id)
       .map(&:to_s)
+  end
+
+  def has_own_schema?
+    MIGRATED_FORMATS.include?(kind)
   end
 
   def self.multipart_formats

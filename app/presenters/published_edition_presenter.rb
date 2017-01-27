@@ -5,6 +5,14 @@ class PublishedEditionPresenter
   end
 
   def render_for_publishing_api(options={})
+    if @artefact.has_own_schema?
+      send("render_#{@artefact.kind}", options)
+    else
+      render_generic_schema(options)
+    end
+  end
+
+  def render_generic_schema(options={})
     {
       title: @edition.title,
       base_path: base_path,
@@ -26,13 +34,39 @@ class PublishedEditionPresenter
     }
   end
 
+  def render_help_page(options={})
+    {
+      content_id: @artefact.content_id,
+      title: @edition.title,
+      base_path: base_path,
+      description: @edition.overview || "",
+      schema_name: "help",
+      document_type: @artefact.kind,
+      need_ids: [],
+      public_updated_at: public_updated_at,
+      publishing_app: "publisher",
+      rendering_app: "frontend",
+      routes: routes,
+      redirects: [],
+      update_type: update_type(options),
+      change_note: @edition.latest_change_note,
+      links: {
+        external_related_links: external_related_links,
+      },
+      details: {
+        body: @edition.body
+      },
+      locale: @artefact.language,
+    }
+  end
+
 private
 
   def external_related_links
     @edition.artefact.external_links.map do |link|
       {
-        "url": link["url"],
-        "title": link["title"]
+        url: link["url"],
+        title: link["title"]
       }
     end
   end
